@@ -6,7 +6,7 @@ const paginationContainer = document.querySelector(".pagination");
 const categoryList = document.getElementById("categories-list");
 const searchBar = document.querySelector(".search-bar");
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 8;
 
 /*  
  * DOCU: Renders category buttons into the categories list container.
@@ -121,7 +121,8 @@ function categoryFilter(category) {
  * Last Updated By: Allan Banzuela  
  */
 function searchFilter() {
-    const searchTerm = searchBar.value.toLowerCase();
+    const rawSearchValue = searchBar.value.trim();
+    const searchTerm = rawSearchValue.toLowerCase();
 
     // If search bar is empty, go back to paginated view
     if (searchTerm === "") {
@@ -138,11 +139,41 @@ function searchFilter() {
         }
     });
 
+    if (filtered.length === 0) {
+        renderNoSearchResults(rawSearchValue);
+        return;
+    }
+
     goToPage(1, filtered);
 }
 
 // Listen for input on the search bar
 searchBar.addEventListener("input", searchFilter);
+
+/*
+ * DOCU: Shows an empty-state message when no products match the search term.
+ * @param {string} searchValue - The raw value from the search input.
+ * @returns {void}
+ */
+function renderNoSearchResults(searchValue) {
+    if (!productContainer) return;
+
+    productContainer.innerHTML = "";
+
+    const message = document.createElement("p");
+    message.className = "search-empty-state";
+    message.textContent = '"' + searchValue + '" is not a product in the store';
+
+    productContainer.appendChild(message);
+
+    if (productLength) {
+        productLength.innerText = "(0)";
+    }
+
+    if (paginationContainer) {
+        paginationContainer.innerHTML = "";
+    }
+}
 
 
 
@@ -174,10 +205,10 @@ function renderProducts(products) {
         const infoLeft = document.createElement("div");
         const name = document.createElement("h3");
         const meta = document.createElement("p");
-        infoLeft.append(name, meta); 
+        infoLeft.append(name, meta);
         const price = document.createElement("p");
-        infoDiv.append(infoLeft, price); 
-        card.append(thumbDiv, infoDiv); 
+        infoDiv.append(infoLeft, price);
+        card.append(thumbDiv, infoDiv);
 
         card.classList.add("product-card");
         thumbDiv.classList.add("product-thumb");
@@ -315,3 +346,4 @@ function renderPagination(totalPages, activePage, productList) {
 }
 
 goToPage(1);
+updateCartCountBadge();
